@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  email         String       @unique
+  name          String
+  password      String
+  role          Role         @default(USER)  
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Product{
+  id            Int          @id @default(autoincrement())
+  brandName     String
+  image         String?
+  size          String 
+  quantity      Int          @default(0)
+  category      String
+  purchasePrice Int          @default(0)
+  salesPrice    Int          @default(0)
+  offerId       Int?
+  date          DateTime
+  status        Available    @default(INACTIVE)
+
+  purchases     Purchase[]
+  orderItem     OrderItem[]
+}
+
+enum Available{
+  ACTIVE
+  SOON
+  INACTIVE
+}
+
+model Purchase{
+  id            Int          @id @default(autoincrement())
+  purchaserName String
+  phoneNumber   String
+  date          DateTime
+  quantity      Int
+  purchasePrice Int
+  productId     Int
+  
+  product     Product       @relation(fields: [productId], references: [id])
+}
+
+model Customer{
+  id            Int          @id @default(autoincrement())
+  name          String?
+  phoneNumber   String       @unique
+  date          DateTime
+
+  order         Order[]
+}
+
+model Order{
+  id            Int          @id @default(autoincrement())
+  date          DateTime
+  totalPrice    Int
+  totalQuantity Int
+  customerId    Int
+
+  customer         Customer?        @relation(fields: [customerId], references: [id])
+  orderItem     OrderItem[]
+}
+
+model OrderItem{
+  id            Int          @id @default(autoincrement())
+  productId     Int
+  quantity      Int
+  actualPrice   Int
+  saledPrice    Int
+  date          DateTime
+  orderId       Int 
+
+  product       Product       @relation(fields: [productId], references: [id])
+  order         Order?        @relation(fields: [orderId], references: [id])
+}
