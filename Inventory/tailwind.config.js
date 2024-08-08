@@ -9,7 +9,8 @@ export default {
     extend: {
       boxShadow:{
         "login-shadow":"1px 1px 3px 2px #8580e2",
-        "sidebarshadow":'2px 0px 3px -2px rgba(0, 0, 0, 0.3)'
+        "sidebarshadow":'2px 0px 3px -2px rgba(0, 0, 0, 0.3)',
+        "editcomponent":"0px 3px 8px 0px #00000026"
       },
       colors:{
         "primary":"#8580e2",

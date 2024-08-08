@@ -91,5 +91,46 @@ const addOrder = async(req,res)=>{
 
 }
 
+const getOrder = async (_,res)=>{
+    try{
 
-module.exports = { addOrder }
+        const order = await prisma.order.findMany({
+            include:{
+                customer:true
+            }
+        })
+
+        res.status(200).json({message:"Date retrived successfully",data:order})
+    
+    }catch(err){
+        res.status(500).json({message:err.message})
+    }
+}
+
+const getOrderItem = async(req,res)=>{
+    const { id } = req.params
+
+    if(!id){
+        res.status(404).json({message:"Order ID is needed."})
+    }
+
+    try{
+
+        const order = await prisma.order.findUnique({
+            where: { id: parseInt(id) }
+        })
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found for given ID." })
+        }
+
+        const data = await prisma.orderItem.findMany({where:{orderId:parseInt(id)},include:{product:true,order:true}})
+
+        return res.status(200).json({message:"Order items for given id retrived successfully",data:data})
+
+    }catch(err){
+            return res.status(500).json({message:err.message})
+    }
+}
+
+module.exports = { addOrder, getOrder, getOrderItem }

@@ -37,7 +37,7 @@ model Product{
   salesPrice    Int          @default(0)
   offerId       Int?
   date          DateTime
-  status        Available    @default(INACTIVE)
+  status        Available    @default(SOON)
 
   purchases     Purchase[]
   orderItem     OrderItem[]

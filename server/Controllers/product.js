@@ -21,10 +21,10 @@ const addProduct = async(req,res)=>{
                 brandName,
                 image: image || null,
                 size, 
-                quantity: quantity || 0,
+                quantity: parseInt(quantity) || 0,
                 category,
-                purchasePrice: purchasePrice || 0,
-                salesPrice: salesPrice || 0,
+                purchasePrice: parseInt(purchasePrice) || 0,
+                salesPrice: parseInt(salesPrice) || 0,
                 date: new Date()
             }
         })
@@ -43,8 +43,24 @@ const getProduct = async (_, res) => {
             where:{status:"ACTIVE"}
         })
 
-        if (product.length==0) {
-            return res.status(404).json({ message: "No product found",data:product })
+        res.status(200).json({ message: "Successfully retrived", data:product})
+
+    } catch (err) {
+        console.error("Error fetching product(s):", err)
+        res.status(500).json({ message: "Error fetching product(s)", error: err.message })
+    }
+}
+
+const getProductId = async (req, res) => {
+    try {
+        const { id } = req.params
+        
+        const product = await prisma.product.findUnique({
+            where: { id: parseInt(id) }
+        })
+
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" })
         }
 
         res.status(200).json({ message: "Successfully retrived", data:product})
@@ -92,7 +108,7 @@ const updateProduct = async (req, res) => {
             purchasePrice,
             salesPrice
         } = req.body
-
+      
         if(!id){
             return res.status(404).json({ message: "Please enter the id of the product" })
         }
@@ -111,10 +127,10 @@ const updateProduct = async (req, res) => {
                 brandName: brandName || product.brandName,
                 image: image || product.image,
                 size: size || product.size, 
-                quantity: quantity || product.quantity,
+                quantity: parseInt(quantity) || product.quantity,
                 category: category || product.category,
-                purchasePrice: purchasePrice || product.purchasePrice,
-                salesPrice: salesPrice || product.salesPrice,
+                purchasePrice: parseInt(purchasePrice) || product.purchasePrice,
+                salesPrice: parseInt(salesPrice) || product.salesPrice,
                 date: new Date()
             }
         })
@@ -127,4 +143,24 @@ const updateProduct = async (req, res) => {
     }
 }
 
-module.exports = { getProduct, addProduct, deleteProduct, updateProduct }
+const getProductIdList = async(_,res)=>{
+    try{
+        const list = await prisma.product.findMany({
+            where:{
+                status:{
+                    in: ["ACTIVE", "SOON"]
+                }
+            },
+            select: {
+                id: true
+            }
+        })
+        
+        res.status(200).json({message:"List of product ID is retrived",data:list})
+    }catch (err) {
+        console.error("Error updating product:", err)
+        res.status(500).json({ message: "Error updating product", error: err.message })
+    }
+}
+
+module.exports = { getProduct, addProduct, deleteProduct, updateProduct, getProductId, getProductIdList }
